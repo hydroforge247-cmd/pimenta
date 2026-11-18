@@ -184,3 +184,9 @@ body { background: var(--bg); }
 @media (prefers-reduced-motion: reduce) { .pm-cinema-title span span, .pm-cinema-kicker { animation: none; } .pm-cinema-copy { transition: opacity .6s ease; translate: none; filter: none; } }
 .pm-cinema .pm-btn--ghost { color: #F4EFE6; border-color: rgb(244 239 230 / .7); background: rgb(0 0 0 / .3); backdrop-filter: blur(6px); }
 .pm-cinema + .pm-menu { margin-top: 0; }  /* the menu sheet no longer peeks into the bottom of the phone film */
+
+/* desktop film, 18 Nov: the gold label and the chapter route were too easy to miss */
+.pm .scroll-scrub__kicker { display: inline-block; padding: .45em .9em; border-radius: 999px; background: #C98C3E; color: #1F1C18; font-weight: 800; box-shadow: 0 8px 24px -8px rgb(0 0 0 / .55); }
+.pm .scroll-scrub__route-button { color: #F4EFE6; font-weight: 700; font-size: .95rem; text-shadow: 0 1px 10px rgb(0 0 0 / .7); }
+.pm .scroll-scrub__route { gap: .4rem; }
+.pm .scroll-scrub__route-button[aria-current="step"] { background: rgb(20 18 15 / .55); border-radius: 999px; backdrop-filter: blur(6px); text-decoration-color: #E8B26A; }
