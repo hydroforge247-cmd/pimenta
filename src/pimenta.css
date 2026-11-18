@@ -148,5 +148,3 @@ body { background: var(--bg); }
   }
 }
 @media (prefers-reduced-motion: reduce) { .pm * { transition: none !important; } }
-/* Wide screens: the portrait film stands as a tall panel right of centre (film.tsx portrait mode) */
-@media (min-width: 861px) { .pm .scroll-scrub__poster { object-fit: contain; object-position: 68% 50%; transform: scale(.86); } .pm .scroll-scrub__stage { background: #12110F; } }
