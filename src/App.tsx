@@ -85,8 +85,22 @@ function useAfterFilm() {
   return after;
 }
 
+/** It also steps aside over the booking form, which has its own call link (it covered the form's fields). */
+function useFormInView() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const form = document.querySelector(".pm-form");
+    if (!form) return;
+    const io = new IntersectionObserver(([e]) => setOn(e.isIntersecting));
+    io.observe(form);
+    return () => io.disconnect();
+  }, []);
+  return on;
+}
+
 export default function App() {
   const afterFilm = useAfterFilm();
+  const formInView = useFormInView();
   return (
     <main className="pm">
       <header className="pm-nav" data-solid={afterFilm}>
@@ -108,7 +122,7 @@ export default function App() {
           <div>
             <p className="pm-tag">On the table</p>
             <h2 id="menu-title" className="pm-h2">Hand crafted, the Portuguese way.</h2>
-            <p className="pm-lede">Our full menu is on its way to this page. Until then, ask us what's cooking today, or see the latest menu on our Facebook page.</p>
+            <p className="pm-lede">Ask us what's cooking today, or see the latest menu and specials on our Facebook page.</p>
             <div className="pm-actions">
               <a className="pm-btn" href={`tel:+${PHONE}`}>Call {PHONE_DISPLAY}</a>
               <a className="pm-btn pm-btn--ghost" href={FACEBOOK} target="_blank" rel="noopener">See the menu on Facebook</a>
@@ -154,7 +168,7 @@ export default function App() {
         </div>
       </footer>
 
-      <a className="pm-float" data-hidden={!afterFilm} href={`tel:+${PHONE}`}>Call</a>
+      <a className="pm-float" data-hidden={!afterFilm || formInView} href={`tel:+${PHONE}`}>Call</a>
     </main>
   );
 }

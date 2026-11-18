@@ -125,7 +125,8 @@ export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes
     // get a light version first so the whole film moves quickly on a slow line, then sharp ones swap in.
     async function loadAll() {
       if (reduced) return;
-      const plan: [number, boolean][] = [[0, false], ...clips.slice(1).map((_, i) => [i + 1, true] as [number, boolean]), ...clips.slice(1).map((_, i) => [i + 1, false] as [number, boolean])];
+      // Sharp only, in walk order: a light version showing first read as heavy blur mid-walk (user, 18 Nov: never drop quality).
+      const plan: [number, boolean][] = clips.map((_, i) => [i, false]);
       for (const [i, lite] of plan) {
         {
           const c = clips[i];
@@ -330,7 +331,7 @@ export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes
         play.to = intro ? stop : stop + 1;
         play.t0 = performance.now();
         const frames = clips[Math.max(0, Math.min(Math.ceil(Math.max(play.to, play.from)) - 1, clips.length - 1))]?.imgs?.length ?? 60;
-        play.dur = Math.min(3600, Math.max(900, 30 * frames * Math.abs(play.to - play.from))); // longer scenes play a little longer
+        play.dur = Math.min(5000, Math.max(900, 40 * frames * Math.abs(play.to - play.from))); // longer scenes play a little longer
       }
       // fade only once the visitor scrolls on past the last stop, never while resting on it
       const last = stops[stops.length - 1] ?? 0;

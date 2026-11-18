@@ -148,3 +148,8 @@ body { background: var(--bg); }
   }
 }
 @media (prefers-reduced-motion: reduce) { .pm * { transition: none !important; } }
+/* Menu/Book/Visit links land below the fixed header, not under it */
+.pm section[id] { scroll-margin-top: 84px; }
+/* Phones: date and time get a full row each so the date never shows cut off */
+@media (max-width: 480px) { .pm-row { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 859px) { .pm-hen-card { max-width: 200px; } }  /* phones: the logo card no longer fills a whole screen */
