@@ -365,7 +365,7 @@ export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes
     function readScroll() {
       if (snap) return readSnap();
       const y = clamp(window.scrollY - rootTop, 0, total);
-      const fade = 0.1 * vh;
+      const fade = 0.45 * vh; // chapters cross-fade over half a screen of scrolling (a tenth read as a jump at the door, 18 Nov)
       let idx = 0;
       clips.forEach((c, i) => {
         if (y >= c.start) idx = i;
@@ -403,7 +403,7 @@ export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes
         const v = c.video;
         if (!v || !c.ready || v.seeking) continue;
         if (!c.visible && Math.abs(c.current - c.target) < 0.002) continue;
-        c.current += (c.target - c.current) * 0.2;
+        c.current += (c.target - c.current) * 0.14; // a little more glide behind the scroll
         const t = clamp(c.current, 0, 0.999) * (v.duration || 1);
         if (Math.abs(v.currentTime - t) > epsilon) {
           try {
@@ -579,7 +579,8 @@ export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes
 
       {/* Spacers give each chapter its scroll length and its #id; the copy itself lives on the pinned stage. */}
       <div className="scroll-scrub__story" aria-hidden="false">
-        {intro ? <div id={intro.id} className="scroll-scrub__chapter" /> : null}
+        {/* short resting stretch: the walk starts with the first scroll (user, 18 Nov: nothing moved for a quarter of the page) */}
+        {intro ? <div id={intro.id} className="scroll-scrub__chapter" style={{ "--ss-len": 0.2 } as CSSProperties} /> : null}
         {scenes.map((s) => (
           <div key={s.id} id={s.id} className="scroll-scrub__chapter" data-film-band="" style={{ "--ss-len": s.scroll ?? 1 } as CSSProperties} />
         ))}
