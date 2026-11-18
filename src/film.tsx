@@ -309,7 +309,8 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
         play.from = play.g;
         play.to = stop + 1;
         play.t0 = performance.now();
-        play.dur = Math.min(3200, Math.max(900, 1800 * Math.abs(play.to - play.from)));
+        const frames = clips[Math.min(Math.max(play.to, play.from) - 1, clips.length - 1)]?.imgs?.length ?? 60;
+        play.dur = Math.min(3600, Math.max(900, 30 * frames * Math.abs(play.to - play.from))); // longer scenes play a little longer
       }
       // fade only once the visitor scrolls on past the last stop, never while resting on it
       const last = clips[clips.length - 1].start;
