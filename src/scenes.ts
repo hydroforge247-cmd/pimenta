@@ -1,9 +1,10 @@
 /**
- * Pimenta walk-through (18 Nov 2026): the visitor scrolls from the street, through the front door,
- * past the bar and the dining room, out to the courtyard with the hen on the wall.
- * Built from the owner's own phone videos, cleaned up truthfully on Higgsfield (film-src/).
+ * Pimenta walk-through (18 Nov 2026, v3): the visitor walks from the street, up the porch, through the
+ * dark front door and the brick hallway to the bar, then the dining room and the courtyard.
+ * Desktop entrance: Google Flow clips made only from truthful keyframes of the real building (film-src/flow).
+ * The film rests on the street until the first scroll or swipe.
  */
-import type { ScrollScrubScene, ScrollScrubTheme } from "./film";
+import type { FilmCopy, ScrollScrubScene, ScrollScrubTheme } from "./film";
 
 export const scrollScrubTheme: ScrollScrubTheme = {
   accent: "#E8B26A",
@@ -25,25 +26,33 @@ const seg = (n: number) => ({
 export const PHONE = "27750269451";
 export const PHONE_DISPLAY = "075 026 9451";
 
+/** Where the film rests when the page opens: the street. */
+export const filmIntro: FilmCopy = {
+  id: "welcome",
+  kicker: "Hand crafted Portuguese cuisine · Potchefstroom",
+  title: "Welcome to Pimenta.",
+  body: "Portuguese cooking at its best. Like the people: warm, vibrant and a little mysterious.",
+  cta: [{ label: "Book a table", href: "#book" }, { label: `Call ${PHONE_DISPLAY}`, href: `tel:+${PHONE}` }],
+};
+
 export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     ...seg(1),
-    id: "welcome",
-    label: "Welcome",
-    kicker: "Hand crafted Portuguese cuisine · Potchefstroom",
-    title: "Welcome to Pimenta.",
-    body: "Portuguese cooking at its best. Like the people: warm, vibrant and a little mysterious.",
-    cta: [{ label: "Book a table", href: "#book" }, { label: `Call ${PHONE_DISPLAY}`, href: `tel:+${PHONE}` }],
-    scroll: 1.5,
+    id: "inside",
+    label: "Come in",
+    kicker: "Come on in",
+    title: "Through the old front door.",
+    body: "Up the veranda of the white Victorian house and in through the dark front door.",
+    scroll: 2.2,
   },
   {
     ...seg(2),
-    id: "inside",
-    label: "Inside",
-    kicker: "Come on in",
+    id: "bar",
+    label: "Bar",
+    kicker: "The bar",
     title: "Pull up a chair at the bar.",
-    body: "Green tiles, warm wood and a long wall of bottles, right inside the front door.",
-    scroll: 1.3,
+    body: "Down the brick hallway to green tiles, warm wood and a long wall of bottles.",
+    scroll: 2.2,
   },
   {
     ...seg(3),
@@ -51,7 +60,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     label: "Tables",
     kicker: "The dining rooms",
     title: "Every table has a story.",
-    body: "Old wooden doors, tall windows and a place at the table for everyone.",
+    body: "Old wooden floors, tall windows and a place at the table for everyone.",
     scroll: 1.3,
   },
   {

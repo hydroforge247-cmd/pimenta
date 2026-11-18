@@ -59,7 +59,13 @@ interface Clip {
   drawn: number;
 }
 
-export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; theme: ScrollScrubTheme }) {
+export type FilmCopy = Pick<ScrollScrubScene, "id" | "kicker" | "title" | "body" | "tags" | "cta" | "align">;
+
+/**
+ * intro: copy for a resting stop BEFORE the first clip (the film waits there until the first swipe).
+ * portrait: use the portrait (phone) film on every screen; wide screens show it as a tall panel over a blurred fill.
+ */
+export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes: ScrollScrubScene[]; theme: ScrollScrubTheme; intro?: FilmCopy; portrait?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
   const jumpRef = useRef<(i: number) => void>(() => {});
   const [active, setActive] = useState(0);
@@ -70,14 +76,17 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
     const layers = [...root.querySelectorAll<HTMLElement>("[data-film-layer]")];
     const bands = [...root.querySelectorAll<HTMLElement>("[data-film-band]")];
     const coarse = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-    const mobile = window.matchMedia(MOBILE_QUERY).matches;
+    const mobile = portrait || window.matchMedia(MOBILE_QUERY).matches;
     // Phones: the film only moves under the finger, and Huawei power saving turns reduce-motion on, so ignore it there.
     const reduced = !mobile && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const epsilon = mobile ? 0.02 : 0.008;
     // Phones: one swipe = one stop. The film plays itself to the next stop instead of following the finger.
     const snap = mobile && !reduced && scenes.every((s) => !!s.frames);
     if (snap) root.dataset.snap = "true";
-    const play = { g: 0, from: 0, to: 1, t0: performance.now(), dur: 1800, stop: 0 };
+    const play = { g: 0, from: 0, to: intro ? 0 : 1, t0: performance.now(), dur: 1800, stop: 0 };
+    const stopEls = [...root.querySelectorAll<HTMLElement>(".scroll-scrub__chapter")];
+    let stops: number[] = [];
+    const decoded = (c?: Clip) => !!c?.imgs && c.imgs.filter(Boolean).length === c.imgs.length;
     const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     const clips: Clip[] = layers.map((layer, i) => ({
       layer, band: bands[i], start: 0, end: 0, target: 0, current: 0,
@@ -108,6 +117,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
         c.end = c.start + c.band.offsetHeight;
       }
       total = Math.max(clips[clips.length - 1]?.end ?? vh, vh);
+      stops = stopEls.map((el) => el.getBoundingClientRect().top + y - rootTop);
       dirty = true;
     }
 
@@ -281,13 +291,23 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
       }
       const ctx = cv.getContext("2d")!;
       ctx.imageSmoothingQuality = "high";
+      const panel = portrait && w / h > 1;
       const paint = (img: HTMLImageElement, alpha: number) => {
-        const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight); // object-fit: cover
+        const scale = panel ? (h * 0.86) / img.naturalHeight : Math.max(w / img.naturalWidth, h / img.naturalHeight); // panel, or object-fit: cover
         const dw = img.naturalWidth * scale;
         const dh = img.naturalHeight * scale;
         ctx.globalAlpha = alpha;
-        ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+        ctx.drawImage(img, panel ? w * 0.68 - dw / 2 : (w - dw) / 2, (h - dh) / 2 + (panel ? h * 0.03 : 0), dw, dh);
       };
+      const wide = portrait && w / h > (imgs[k0]!.naturalWidth / imgs[k0]!.naturalHeight) * 1.2;
+      if (wide) {
+        // blurred fill behind, then the sharp portrait film as a tall panel right of centre
+        const img = imgs[k0]!;
+        const sc = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+        ctx.filter = "blur(36px) brightness(.55)";
+        ctx.drawImage(img, (w - img.naturalWidth * sc) / 2, (h - img.naturalHeight * sc) / 2, img.naturalWidth * sc, img.naturalHeight * sc);
+        ctx.filter = "none";
+      }
       paint(imgs[k0]!, 1);
       if (mix > 0) paint(imgs[k1]!, mix);
       ctx.globalAlpha = 1;
@@ -300,27 +320,28 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
     function readSnap() {
       const y = clamp(window.scrollY - rootTop, 0, total);
       let stop = 0;
-      clips.forEach((c, i) => {
-        if (y >= c.start - 0.5 * vh) stop = i;
+      stops.forEach((top, i) => {
+        if (y >= top - 0.5 * vh) stop = i;
       });
       document.documentElement.classList.toggle("ss-snap", window.scrollY - rootTop < total - 0.98 * vh);
       if (stop !== play.stop) {
         play.stop = stop;
         play.from = play.g;
-        play.to = stop + 1;
+        play.to = intro ? stop : stop + 1;
         play.t0 = performance.now();
-        const frames = clips[Math.min(Math.max(play.to, play.from) - 1, clips.length - 1)]?.imgs?.length ?? 60;
+        const frames = clips[Math.max(0, Math.min(Math.ceil(Math.max(play.to, play.from)) - 1, clips.length - 1))]?.imgs?.length ?? 60;
         play.dur = Math.min(3600, Math.max(900, 30 * frames * Math.abs(play.to - play.from))); // longer scenes play a little longer
       }
       // fade only once the visitor scrolls on past the last stop, never while resting on it
-      const last = clips[clips.length - 1].start;
+      const last = stops[stops.length - 1] ?? 0;
       root!.style.setProperty("--ss-exit", String(clamp((y - last - 0.2 * vh) / (0.3 * vh))));
     }
 
     function animateSnap() {
       const now = performance.now();
-      const ci0 = Math.min(Math.floor(play.g), clips.length - 1);
-      if (!clips[ci0]?.ready) play.t0 = now; // hold until the frames for this stretch are in
+      // hold until every frame of the stretch about to play is decoded, so it never stutters
+      const lo = Math.floor(Math.min(play.g, play.to)), hi = Math.ceil(Math.max(play.g, play.to)) - 1;
+      for (let i = Math.max(0, lo); i <= Math.min(hi, clips.length - 1); i++) if (!decoded(clips[i])) { play.t0 = now; break; }
       const p = clamp((now - play.t0) / play.dur);
       play.g = play.from + (play.to - play.from) * ease(p);
       const ci = Math.min(Math.floor(play.g), clips.length - 1);
@@ -333,7 +354,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
         c.layer.style.zIndex = on ? "2" : "1";
       });
       // the words for a stop arrive as the film settles there
-      const textIdx = p >= 0.6 ? play.to - 1 : shown < 0 ? -1 : shown;
+      const textIdx = p >= 0.6 ? (intro ? play.to : play.to - 1) : shown < 0 ? -1 : shown;
       if (textIdx !== shown && textIdx >= 0) {
         shown = textIdx;
         setActive(textIdx);
@@ -350,7 +371,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
       });
       clips.forEach((c, i) => {
         c.target = clamp((y - c.start) / Math.max(c.end - c.start, 1));
-        const outside = y < c.start ? c.start - y : y > c.end ? y - c.end : 0;
+        const outside = y < c.start ? (intro && i === 0 ? 0 : c.start - y) : y > c.end ? y - c.end : 0; // intro rests on clip 0's first frame
         const t = clamp(1 - outside / Math.max(fade, 1));
         const opacity = reduced ? (outside === 0 ? 1 : 0) : t * t * (3 - 2 * t);
         c.visible = opacity > 0.001;
@@ -362,6 +383,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
       clips.forEach((c, i) => {
         if (y >= c.start + (i ? 0.3 : 0) * (c.end - c.start)) textIdx = i;
       });
+      if (intro) textIdx = y < clips[0].start ? 0 : textIdx + 1;
       if (textIdx !== shown) {
         shown = textIdx;
         setActive(textIdx);
@@ -495,7 +517,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
           {scenes.map((s, i) => (
             <figure key={s.id} className="scroll-scrub__layer" data-film-layer="" style={{ opacity: i === 0 ? 1 : 0 }}>
               <picture className="scroll-scrub__picture">
-                {s.mobilePoster ? <source media={MOBILE_QUERY} srcSet={asset(s.mobilePoster)} /> : null}
+                {s.mobilePoster ? <source media={portrait ? "all" : MOBILE_QUERY} srcSet={asset(s.mobilePoster)} /> : null}
                 <img
                   className="scroll-scrub__poster"
                   src={asset(s.poster)}
@@ -509,7 +531,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
           ))}
         </div>
         <div className="scroll-scrub__copies">
-          {scenes.map((s, i) => {
+          {(intro ? [intro, ...scenes] : scenes).map((s, i) => {
             const Heading = i === 0 ? "h1" : "h2";
             return (
               <article key={s.id} className="scroll-scrub__chapter-pin" data-align={s.align ?? "left"} data-on={active === i} aria-hidden={active !== i}>
@@ -545,7 +567,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
               key={s.id}
               type="button"
               className="scroll-scrub__route-button"
-              aria-current={active === i ? "step" : undefined}
+              aria-current={active === i + (intro ? 1 : 0) ? "step" : undefined}
               onClick={() => jumpRef.current(i)}
             >
               <span>{s.label}</span>
@@ -556,6 +578,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
 
       {/* Spacers give each chapter its scroll length and its #id; the copy itself lives on the pinned stage. */}
       <div className="scroll-scrub__story" aria-hidden="false">
+        {intro ? <div id={intro.id} className="scroll-scrub__chapter" /> : null}
         {scenes.map((s) => (
           <div key={s.id} id={s.id} className="scroll-scrub__chapter" data-film-band="" style={{ "--ss-len": s.scroll ?? 1 } as CSSProperties} />
         ))}
