@@ -80,8 +80,8 @@ export function ScrollScrub({ scenes, theme, intro, portrait = false }: { scenes
     // Phones: the film only moves under the finger, and Huawei power saving turns reduce-motion on, so ignore it there.
     const reduced = !mobile && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const epsilon = mobile ? 0.02 : 0.008;
-    // Phones: one swipe = one stop. The film plays itself to the next stop instead of following the finger.
-    const snap = mobile && !reduced && scenes.every((s) => !!s.frames);
+    // Phones scroll through the film like desktop: swipe-to-play felt like auto-play fighting the finger (user, 18 Nov).
+    const snap = false;
     if (snap) root.dataset.snap = "true";
     const play = { g: 0, from: 0, to: intro ? 0 : 1, t0: performance.now(), dur: 1800, stop: 0 };
     const stopEls = [...root.querySelectorAll<HTMLElement>(".scroll-scrub__chapter")];

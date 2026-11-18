@@ -153,3 +153,4 @@ body { background: var(--bg); }
 /* Phones: date and time get a full row each so the date never shows cut off */
 @media (max-width: 480px) { .pm-row { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 859px) { .pm-hen-card { max-width: 200px; } }  /* phones: the logo card no longer fills a whole screen */
+.pm-hen-card .pm-logo { width: 70%; height: auto; }  /* logo scales with its circle so the wordmark never spills out */
