@@ -1,0 +1,11 @@
+/* Minimal reset matching the original build's defaults. */
+*, *::before, *::after { box-sizing: border-box; border: 0 solid; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; line-height: 1.5;  }
+body { min-height: 100vh; }
+img, video { display: block; max-width: 100%; }
+h1, h2, h3, h4 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; }
+ul, ol { list-style: none; }
+button, input, select { font: inherit; color: inherit; }
+button { background: transparent; cursor: pointer; }
+:focus-visible { outline-offset: 3px; }

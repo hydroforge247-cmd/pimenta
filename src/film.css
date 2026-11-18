@@ -1,0 +1,85 @@
+/* Layout and type for the scroll-film hero (NFC Software Solutions). */
+.scroll-scrub { --ss-progress: 0; position: relative; isolation: isolate; color: var(--ss-ink); background: var(--ss-bg); }
+.scroll-scrub__stage { position: sticky; top: 0; z-index: 0; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; background: var(--ss-bg); }
+.scroll-scrub__media,
+.scroll-scrub__layer,
+.scroll-scrub__picture,
+.scroll-scrub__poster,
+.scroll-scrub__video { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scroll-scrub__layer { margin: 0; overflow: hidden; }
+.scroll-scrub__poster,
+.scroll-scrub__video { display: block; max-width: none; object-fit: cover; }
+.scroll-scrub__video { z-index: 1; }
+.scroll-scrub__layer[data-video-painted="true"] .scroll-scrub__poster { visibility: hidden; }
+
+.scroll-scrub__progress {
+  position: absolute; z-index: 5; top: 0; right: 0; left: 0; height: 2px;
+  background: color-mix(in srgb, var(--ss-ink) 14%, transparent); pointer-events: none;
+}
+.scroll-scrub__progress span {
+  display: block; width: 100%; height: 100%; background: var(--ss-accent);
+  transform: scaleX(var(--ss-progress)); transform-origin: 0 50%;
+}
+
+.scroll-scrub__route {
+  position: absolute; z-index: 6; right: clamp(1rem, 4vw, 4rem); left: clamp(1rem, 4vw, 4rem);
+  display: flex; justify-content: flex-end; gap: .25rem;
+}
+.scroll-scrub__route-button {
+  min-height: 2.75rem; padding: .65rem .9rem; border: 0; color: var(--ss-muted);
+  background: transparent; font: inherit; cursor: pointer;
+}
+.scroll-scrub__route-button:hover,
+.scroll-scrub__route-button[aria-current="step"] { color: var(--ss-ink); }
+.scroll-scrub__route-button[aria-current="step"] {
+  text-decoration: underline; text-decoration-color: var(--ss-accent);
+  text-decoration-thickness: .15em; text-underline-offset: .3em;
+}
+.scroll-scrub__route-button:focus-visible { outline: 2px solid var(--ss-accent); outline-offset: 3px; }
+
+.scroll-scrub__story { position: relative; z-index: 3; margin-top: -100vh; margin-top: -100svh; pointer-events: none; }
+.scroll-scrub__chapter { position: relative; min-height: calc(var(--ss-len, 1) * 100vh); min-height: calc(var(--ss-len, 1) * 100svh); /* svh: phone address bar sliding must not move chapter positions */ }
+.scroll-scrub__copies { position: absolute; inset: 0; z-index: 3; opacity: calc(1 - var(--ss-exit, 0)); }
+/* Each chapter's copy is pinned on the stage and cross-fades in as its chapter starts. */
+.scroll-scrub__chapter-pin {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  padding: clamp(5rem, 9vw, 8rem) clamp(1.25rem, 6vw, 6rem); pointer-events: none;
+  opacity: 0; transform: translateY(28px); transition: opacity .5s ease, transform .7s cubic-bezier(.2,.8,.2,1), visibility 0s linear .5s; visibility: hidden;
+}
+.scroll-scrub__chapter-pin[data-on="true"] { opacity: 1; transform: none; visibility: visible; transition-delay: .12s, .12s, 0s; }
+.scroll-scrub__chapter-pin[data-align="right"] { justify-content: flex-end; }
+@media (prefers-reduced-motion: reduce) { .scroll-scrub__chapter-pin { transition: none; transform: none; } }
+.scroll-scrub__copy { position: relative; width: min(40rem, 48vw); pointer-events: auto; }
+.scroll-scrub__kicker {
+  max-width: 30ch; margin: 0 0 1rem; color: var(--ss-accent); font-size: .8rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.scroll-scrub__title {
+  max-width: 13ch; margin: 0; color: var(--ss-ink); font-size: clamp(2.75rem, 6vw, 6.75rem);
+  font-weight: 700; line-height: .94; letter-spacing: -.045em; text-wrap: balance;
+}
+.scroll-scrub__body {
+  max-width: 42ch; margin: 1.5rem 0 0; color: var(--ss-muted);
+  font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.55;
+}
+.scroll-scrub__tags { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+.scroll-scrub__tags li {
+  padding: .45rem .7rem; border: 1px solid color-mix(in srgb, var(--ss-ink) 20%, transparent);
+  color: var(--ss-ink); font-size: .82rem;
+}
+
+@media (max-width: 860px) {
+  .scroll-scrub__route { right: .75rem; left: .75rem; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .scroll-scrub__route-button { flex: 0 0 auto; }
+  .scroll-scrub__chapter-pin,
+  .scroll-scrub__chapter-pin[data-align="right"] {
+    align-items: flex-end; justify-content: flex-start;
+    padding: 6.5rem 1.25rem calc(4rem + env(safe-area-inset-bottom)) 1.25rem;
+  }
+  .scroll-scrub__copy { width: min(100%, 36rem); }
+  .scroll-scrub__title { max-width: 14ch; font-size: clamp(2.3rem, 11vw, 4.5rem); }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 861px) and (pointer: fine) {
+  .scroll-scrub__chapter { min-height: 100vh !important; min-height: 100dvh !important; }
+}
