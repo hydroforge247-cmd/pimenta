@@ -1,6 +1,6 @@
 /**
  * Pimenta walk-through (18 Nov 2026, v3): the visitor walks from the street, up the porch, through the
- * dark front door and the brick hallway to the bar, then the dining room and the courtyard.
+ * glass front doors and the wooden hallway to the bar, then the dining room and the courtyard.
  * Desktop entrance: Google Flow clips made only from truthful keyframes of the real building (film-src/flow).
  * The film rests on the street until the first scroll or swipe.
  */
@@ -42,7 +42,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     label: "Come in",
     kicker: "Come on in",
     title: "Through the old front door.",
-    body: "Up the veranda of the white Victorian house and in through the dark front door.",
+    body: "Up the veranda of the white Victorian house and in through the tall glass doors.",
     scroll: 2.2,
   },
   {
@@ -51,7 +51,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     label: "Bar",
     kicker: "The bar",
     title: "Pull up a chair at the bar.",
-    body: "Down the brick hallway to green tiles, warm wood and a long wall of bottles.",
+    body: "Down the wooden hallway to warm light, long tables and a wall of bottles.",
     scroll: 2.2,
   },
   {
