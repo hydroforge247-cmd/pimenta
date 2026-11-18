@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { ScrollScrub } from "./film";
-import { PHONE, PHONE_DISPLAY, filmIntro, scrollScrubScenes, scrollScrubTheme } from "./scenes";
+import { CinemaHero } from "./cinema";
+import { PHONE, PHONE_DISPLAY, film } from "./scenes";
 
 const BASE = import.meta.env.BASE_URL;
 const MAPS = "https://www.google.com/maps/search/?api=1&query=-26.7111459%2C27.0949";
@@ -76,7 +76,7 @@ function Booking() {
 function useAfterFilm() {
   const [after, setAfter] = useState(false);
   useEffect(() => {
-    const film = document.querySelector(".scroll-scrub");
+    const film = document.querySelector(".pm-cinema");
     if (!film) return;
     const io = new IntersectionObserver(([e]) => setAfter(!e.isIntersecting && e.boundingClientRect.top < 0));
     io.observe(film);
@@ -114,7 +114,7 @@ export default function App() {
         <a className="pm-nav-call" href="#book"><span className="pm-wide-only">Book a table</span><span className="pm-phone-only">Book</span></a>
       </header>
 
-      <ScrollScrub scenes={scrollScrubScenes} theme={scrollScrubTheme} intro={filmIntro} />
+      <CinemaHero src={film.src} poster={film.poster} cues={film.cues} brand="PIMENTA" />
 
       <section className="pm-menu" id="menu" aria-labelledby="menu-title">
         <div className="pm-tiles" aria-hidden="true" />

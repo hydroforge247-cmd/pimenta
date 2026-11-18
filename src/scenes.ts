@@ -74,3 +74,16 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     scroll: 2.8,
   },
 ];
+
+/** Autoplay film (cinema.tsx): one portrait cut of single cinematic shots; `at` = second the words change. */
+export const film = {
+  src: `${import.meta.env.BASE_URL}assets/film/pimenta-m.mp4`,
+  poster: `${import.meta.env.BASE_URL}assets/film/pimenta-m.jpg`,
+  cues: [
+    { at: 0, kicker: filmIntro.kicker, title: filmIntro.title, body: filmIntro.body, cta: filmIntro.cta },
+    { at: 11.9, kicker: "Come on in", title: "Through the old front door." },
+    { at: 22.7, kicker: "The bar", title: "Pull up a chair at the bar." },
+    { at: 27.6, kicker: "The dining room", title: "Every table has a story." },
+    { at: 33, kicker: "The courtyard", title: "Long lunches under the pergola.", cta: [{ label: "Book a table", href: "#book" }, { label: "Find us", href: "#visit" }] },
+  ],
+};

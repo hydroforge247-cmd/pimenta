@@ -154,3 +154,31 @@ body { background: var(--bg); }
 @media (max-width: 480px) { .pm-row { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 859px) { .pm-hen-card { max-width: 200px; } }  /* phones: the logo card no longer fills a whole screen */
 .pm-hen-card .pm-logo { width: 70%; height: auto; }  /* logo scales with its circle so the wordmark never spills out */
+
+/* autoplay film hero (cinema.tsx): portrait film, sharp; on wide screens it sits as a tall panel over a blurred still */
+.pm-cinema { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: #0d0c0a; color: #F4EFE6; }
+.pm-cinema-back { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; filter: blur(34px) brightness(.5) saturate(1.2); }
+.pm-cinema-film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.pm-cinema-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / .55), transparent 20%, transparent 42%, rgb(0 0 0 / .55) 62%, rgb(0 0 0 / .85)); }
+.pm-cinema-copy { position: absolute; left: 20px; right: 20px; bottom: calc(44px + env(safe-area-inset-bottom)); max-width: 34rem; opacity: 0; }  /* bottom, over the dark fade: the top of these shots is bright windows and lettering */
+.pm-cinema-copy[data-show="true"] { animation: pm-cue 1.2s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes pm-cue { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.pm-cinema-kicker { margin: 0 0 .5rem; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.pm-cinema-title { margin: 0; font-family: "DM Serif Display", Georgia, serif; font-weight: 400; font-size: clamp(2.3rem, 9vw, 4.4rem); line-height: 1.02; text-shadow: 0 2px 24px rgb(0 0 0 / .45); }
+.pm-cinema-body { margin: .8rem 0 0; font-size: 1rem; line-height: 1.5; max-width: 26rem; text-shadow: 0 1px 14px rgb(0 0 0 / .6); }
+.pm-cinema-cta { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1.2rem; }
+.pm-loader { position: absolute; inset: 0; z-index: 5; display: grid; place-content: center; justify-items: center; gap: 1rem; background: #12110F; color: #F4EFE6; transition: opacity .9s ease, visibility 0s .9s; }
+.pm-loader[data-done="true"] { opacity: 0; visibility: hidden; }
+.pm-loader-brand { margin: 0; font-family: "Archivo Black", "Arial Black", sans-serif; letter-spacing: .3em; font-size: 1.4rem; }
+.pm-loader-bar { width: min(220px, 60vw); height: 2px; background: rgb(255 255 255 / .15); overflow: hidden; }
+.pm-loader-bar i { display: block; height: 100%; background: #E8B26A; transform-origin: left; transition: transform .3s linear; }
+.pm-loader-note { margin: 0; font-size: .8rem; color: #B9AE9F; }
+@media (min-aspect-ratio: 4/5) {
+  .pm-cinema-film { left: auto; right: 8vw; width: auto; aspect-ratio: 9 / 16; object-fit: cover; box-shadow: 0 30px 80px rgb(0 0 0 / .5); }
+  .pm-cinema-copy { left: 8vw; top: 50%; bottom: auto; transform: translateY(-50%); }
+  .pm-cinema-shade { background: linear-gradient(90deg, rgb(0 0 0 / .55), transparent 60%); }
+  .pm-cinema-copy[data-show="true"] { animation-name: pm-cue-side; }
+  @keyframes pm-cue-side { from { opacity: 0; transform: translateY(calc(-50% + 14px)); } to { opacity: 1; transform: translateY(-50%); } }
+}
+@media (prefers-reduced-motion: reduce) { .pm-cinema-copy[data-show="true"] { animation: none; opacity: 1; } }
+.pm-cinema .pm-btn--ghost { color: #F4EFE6; border-color: rgb(244 239 230 / .7); background: rgb(0 0 0 / .3); backdrop-filter: blur(6px); }
