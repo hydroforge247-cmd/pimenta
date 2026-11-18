@@ -11,7 +11,9 @@ export function CinemaHero({ src, poster, cues, brand }: { src: string; poster: 
   const video = useRef<HTMLVideoElement>(null);
   const [pct, setPct] = useState(0);
   const [ready, setReady] = useState(false);
-  const [cue, setCue] = useState(0);
+  const [cue, setCue] = useState(0); // words on screen
+  const [out, setOut] = useState(false); // fading the old words out before the next ones come in
+  const target = useRef(0);
 
   useEffect(() => {
     const ctl = new AbortController();
@@ -53,7 +55,13 @@ export function CinemaHero({ src, poster, cues, brand }: { src: string; poster: 
     cues.forEach((c, k) => {
       if (t >= c.at) i = k;
     });
-    if (i !== cue) setCue(i);
+    if (i === target.current) return;
+    target.current = i;
+    setOut(true); // user, 18 Nov: words swapped instantly; now fade out, then the next fade in with the film
+    setTimeout(() => {
+      setCue(target.current);
+      setOut(false);
+    }, 900);
   };
 
   const c = cues[cue];
@@ -62,9 +70,15 @@ export function CinemaHero({ src, poster, cues, brand }: { src: string; poster: 
       <img className="pm-cinema-back" src={poster} alt="" aria-hidden="true" />
       <video ref={video} className="pm-cinema-film" poster={poster} muted playsInline preload="none" onTimeUpdate={onTime} aria-hidden="true" />
       <div className="pm-cinema-shade" aria-hidden="true" />
-      <div className="pm-cinema-copy" key={cue} data-show={ready}>
-        {c.kicker && <p className="pm-cinema-kicker">{c.kicker}</p>}
-        <h1 className="pm-cinema-title">{c.title}</h1>
+      <div className="pm-cinema-copy" data-show={ready && !out}>
+        {c.kicker && <p className="pm-cinema-kicker" key={`k${cue}`}>{c.kicker}</p>}
+        <h1 className="pm-cinema-title" key={cue}>
+          {c.title.split(" ").map((w, k) => (
+            <span key={k}>
+              <span style={{ animationDelay: `${250 + k * 90}ms` }}>{w}</span>{" "}
+            </span>
+          ))}
+        </h1>
         {c.body && <p className="pm-cinema-body">{c.body}</p>}
         {c.cta && (
           <div className="pm-cinema-cta">

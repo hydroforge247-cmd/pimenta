@@ -1,6 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { ScrollScrub } from "./film";
 import { CinemaHero } from "./cinema";
-import { PHONE, PHONE_DISPLAY, film } from "./scenes";
+import { PHONE, PHONE_DISPLAY, film, filmIntro, scrollScrubScenes, scrollScrubTheme } from "./scenes";
+
+// Phones get the autoplay film; desktop keeps scrolling through the walk-in (user, 18 Nov). Same test the scroll film uses for phones.
+const ON_PHONE = typeof window !== "undefined" && window.matchMedia("(hover: none) and (pointer: coarse), (max-width: 860px)").matches;
 
 const BASE = import.meta.env.BASE_URL;
 const MAPS = "https://www.google.com/maps/search/?api=1&query=-26.7111459%2C27.0949";
@@ -76,7 +80,7 @@ function Booking() {
 function useAfterFilm() {
   const [after, setAfter] = useState(false);
   useEffect(() => {
-    const film = document.querySelector(".pm-cinema");
+    const film = document.querySelector(".pm-cinema, .scroll-scrub");
     if (!film) return;
     const io = new IntersectionObserver(([e]) => setAfter(!e.isIntersecting && e.boundingClientRect.top < 0));
     io.observe(film);
@@ -114,7 +118,7 @@ export default function App() {
         <a className="pm-nav-call" href="#book"><span className="pm-wide-only">Book a table</span><span className="pm-phone-only">Book</span></a>
       </header>
 
-      <CinemaHero src={film.src} poster={film.poster} cues={film.cues} brand="PIMENTA" />
+      {ON_PHONE ? <CinemaHero src={film.src} poster={film.poster} cues={film.cues} brand="PIMENTA" /> : <ScrollScrub scenes={scrollScrubScenes} theme={scrollScrubTheme} intro={filmIntro} />}
 
       <section className="pm-menu" id="menu" aria-labelledby="menu-title">
         <div className="pm-tiles" aria-hidden="true" />
