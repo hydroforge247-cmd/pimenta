@@ -311,7 +311,9 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
         play.t0 = performance.now();
         play.dur = Math.min(3200, Math.max(900, 1800 * Math.abs(play.to - play.from)));
       }
-      root!.style.setProperty("--ss-exit", String(clamp((y - (total - vh)) / (0.3 * vh))));
+      // fade only once the visitor scrolls on past the last stop, never while resting on it
+      const last = clips[clips.length - 1].start;
+      root!.style.setProperty("--ss-exit", String(clamp((y - last - 0.2 * vh) / (0.3 * vh))));
     }
 
     function animateSnap() {

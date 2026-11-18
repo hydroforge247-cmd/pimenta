@@ -88,4 +88,4 @@
 html.ss-snap { scroll-snap-type: y mandatory; }
 .scroll-scrub[data-snap] .scroll-scrub__chapter { min-height: 100vh !important; min-height: 100svh !important; scroll-snap-align: start; scroll-snap-stop: always; }
 .scroll-scrub[data-snap] .scroll-scrub__snap-end { scroll-snap-align: start; height: 0; }
-.scroll-scrub[data-snap] .scroll-scrub__story { padding-bottom: 48px; } /* the next section's rounded edge stays below the last stop */
+.scroll-scrub[data-snap] .scroll-scrub__story { padding-bottom: calc(100lvh - 100svh + 56px); } /* the next section's rounded edge stays below the last stop */
