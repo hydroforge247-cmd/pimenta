@@ -74,6 +74,11 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
     // Phones: the film only moves under the finger, and Huawei power saving turns reduce-motion on, so ignore it there.
     const reduced = !mobile && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const epsilon = mobile ? 0.02 : 0.008;
+    // Phones: one swipe = one stop. The film plays itself to the next stop instead of following the finger.
+    const snap = mobile && !reduced && scenes.every((s) => !!s.frames);
+    if (snap) root.dataset.snap = "true";
+    const play = { g: 0, from: 0, to: 1, t0: performance.now(), dur: 1800, stop: 0 };
+    const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     const clips: Clip[] = layers.map((layer, i) => ({
       layer, band: bands[i], start: 0, end: 0, target: 0, current: 0,
       visible: i === 0, ready: false, loading: false, drawn: -1,
@@ -247,8 +252,10 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
     function drawFrame(c: Clip) {
       const imgs = c.imgs!;
       const cv = c.canvas!;
-      c.current += (c.target - c.current) * 0.12;
-      if (Math.abs(c.target - c.current) < 0.0004) c.current = c.target;
+      if (!snap) {
+        c.current += (c.target - c.current) * 0.12;
+        if (Math.abs(c.target - c.current) < 0.0004) c.current = c.target;
+      }
       const pos = clamp(c.current) * (imgs.length - 1);
       const near = (want: number) => {
         for (let d = 0; d < imgs.length; d++) {
@@ -289,7 +296,49 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
       c.layer.dataset.videoPainted = "true";
     }
 
+    // Snap mode: which stop the page rests on decides where the film plays to.
+    function readSnap() {
+      const y = clamp(window.scrollY - rootTop, 0, total);
+      let stop = 0;
+      clips.forEach((c, i) => {
+        if (y >= c.start - 0.5 * vh) stop = i;
+      });
+      document.documentElement.classList.toggle("ss-snap", window.scrollY - rootTop < total - 0.98 * vh);
+      if (stop !== play.stop) {
+        play.stop = stop;
+        play.from = play.g;
+        play.to = stop + 1;
+        play.t0 = performance.now();
+        play.dur = Math.min(3200, Math.max(900, 1800 * Math.abs(play.to - play.from)));
+      }
+      root!.style.setProperty("--ss-exit", String(clamp((y - (total - vh)) / (0.3 * vh))));
+    }
+
+    function animateSnap() {
+      const now = performance.now();
+      const ci0 = Math.min(Math.floor(play.g), clips.length - 1);
+      if (!clips[ci0]?.ready) play.t0 = now; // hold until the frames for this stretch are in
+      const p = clamp((now - play.t0) / play.dur);
+      play.g = play.from + (play.to - play.from) * ease(p);
+      const ci = Math.min(Math.floor(play.g), clips.length - 1);
+      const frac = play.g - ci;
+      clips.forEach((c, i) => {
+        const on = i === ci;
+        c.target = c.current = on ? frac : i < ci ? 1 : 0;
+        c.visible = on;
+        c.layer.style.opacity = on ? "1" : "0";
+        c.layer.style.zIndex = on ? "2" : "1";
+      });
+      // the words for a stop arrive as the film settles there
+      const textIdx = p >= 0.6 ? play.to - 1 : shown < 0 ? -1 : shown;
+      if (textIdx !== shown && textIdx >= 0) {
+        shown = textIdx;
+        setActive(textIdx);
+      }
+    }
+
     function readScroll() {
+      if (snap) return readSnap();
       const y = clamp(window.scrollY - rootTop, 0, total);
       const fade = 0.1 * vh;
       let idx = 0;
@@ -372,6 +421,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
         dirty = false;
         readScroll();
       }
+      if (snap) animateSnap();
       updateVideos();
       frame = requestAnimationFrame(tick);
     }
@@ -411,6 +461,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
     return () => {
       destroyed = true;
       cancelAnimationFrame(frame);
+      document.documentElement.classList.remove("ss-snap");
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       window.removeEventListener("orientationchange", layout);
@@ -506,6 +557,7 @@ export function ScrollScrub({ scenes, theme }: { scenes: ScrollScrubScene[]; the
           <div key={s.id} id={s.id} className="scroll-scrub__chapter" data-film-band="" style={{ "--ss-len": s.scroll ?? 1 } as CSSProperties} />
         ))}
       </div>
+      <div className="scroll-scrub__snap-end" aria-hidden="true" />
     </section>
   );
 }

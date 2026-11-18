@@ -83,3 +83,9 @@
 @media (prefers-reduced-motion: reduce) and (min-width: 861px) and (pointer: fine) {
   .scroll-scrub__chapter { min-height: 100vh !important; min-height: 100dvh !important; }
 }
+
+/* Phones: one swipe per stop (film.tsx snap mode). Snapping is only switched on while the film is on screen. */
+html.ss-snap { scroll-snap-type: y mandatory; }
+.scroll-scrub[data-snap] .scroll-scrub__chapter { min-height: 100vh !important; min-height: 100svh !important; scroll-snap-align: start; scroll-snap-stop: always; }
+.scroll-scrub[data-snap] .scroll-scrub__snap-end { scroll-snap-align: start; height: 0; }
+.scroll-scrub[data-snap] .scroll-scrub__story { padding-bottom: 48px; } /* the next section's rounded edge stays below the last stop */
