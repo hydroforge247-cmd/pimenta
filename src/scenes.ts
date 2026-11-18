@@ -42,7 +42,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     label: "Come in",
     kicker: "Come on in",
     title: "Through the old front door.",
-    body: "Up the veranda of the white Victorian house and in through the tall glass doors.",
+    body: "Up the veranda of the white Victorian house and in through the front door.",
     scroll: 2.2,
   },
   {
@@ -79,11 +79,13 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
 export const film = {
   src: `${import.meta.env.BASE_URL}assets/film/pimenta-m.mp4`,
   poster: `${import.meta.env.BASE_URL}assets/film/pimenta-m.jpg`,
+  // lines from Pimenta's own Facebook and listing copy (18 Nov research), timed to the shots of film-src/cinema.mjs
+  // one line per shot, the fade starting just before each cut (the words take ~1.4 s out and ~2 s in)
   cues: [
     { at: 0, kicker: "Portuguese · Potchefstroom", title: filmIntro.title, body: filmIntro.body, cta: filmIntro.cta },
-    { at: 5.9, kicker: "Come on in", title: "Pull up a chair at the bar." },
-    { at: 11.8, kicker: "The dining room", title: "Every table has a story." },
-    { at: 17.2, kicker: "The courtyard", title: "Long lunches under the pergola." },
-    { at: 23.3, kicker: "Hand crafted Portuguese", title: "Pimenta.", body: "Your table is waiting.", cta: [{ label: "Book a table", href: "#book" }, { label: "Find us", href: "#visit" }] },
+    { at: 5.0, kicker: "Come on in", title: "Escape into the magic of Portugal." },
+    { at: 10.9, kicker: "The dining room", title: "Every table has a story.", body: "And everyone has a place at the table." },
+    { at: 16.3, kicker: "Outside", title: "Long lunches on the veranda.", body: "Good food, great company." },
+    { at: 22.3, kicker: "Hand crafted Portuguese", title: "Pimenta.", body: "Your table is waiting.", cta: [{ label: "Book a table", href: "#book" }, { label: "Find us", href: "#visit" }] },
   ],
 };
