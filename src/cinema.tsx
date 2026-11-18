@@ -61,7 +61,7 @@ export function CinemaHero({ src, poster, cues, brand }: { src: string; poster: 
     setTimeout(() => {
       setCue(target.current);
       setOut(false);
-    }, 900);
+    }, 1400);
   };
 
   const c = cues[cue];
@@ -75,7 +75,7 @@ export function CinemaHero({ src, poster, cues, brand }: { src: string; poster: 
         <h1 className="pm-cinema-title" key={cue}>
           {c.title.split(" ").map((w, k) => (
             <span key={k}>
-              <span style={{ animationDelay: `${250 + k * 90}ms` }}>{w}</span>{" "}
+              <span style={{ animationDelay: `${300 + k * 140}ms` }}>{w}</span>{" "}
             </span>
           ))}
         </h1>
